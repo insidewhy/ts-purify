@@ -1,0 +1,30 @@
+{
+  "name": "ts-purify",
+  "version": "1.0.0",
+  "description": "ensure compiled typescript files are removed when the corresponding source files are",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p src",
+    "watch": "npm run build -- -w"
+  },
+  "bin": {
+    "ts-purify": "./bin/ts-purify"
+  },
+  "keywords": [
+    "typescript",
+    "tsc"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fb-watchman": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/fb-watchman": "^2.0.0",
+    "@types/node": "^12.7.4",
+    "husky": "^3.0.5",
+    "pretty-quick": "^1.11.1"
+  }
+}
