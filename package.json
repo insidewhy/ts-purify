@@ -1,6 +1,6 @@
 {
   "name": "ts-purify",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ensure compiled typescript files are removed when the corresponding source files are",
   "main": "lib/index.js",
   "scripts": {

@@ -1,5 +1,3 @@
-import * as util from 'util'
-
 import { cleanAllFiles, watchSourceAndCleanDest } from '.'
 
 async function doMain() {
@@ -20,16 +18,16 @@ async function doMain() {
     } else if (arg === '-d' || arg === '--dest') {
       destDir = args[++i]
     } else if (arg === '-h' || arg === '--help') {
-      console.log(args[1] + ' [-h] [-s <dir>] [-d <dir]')
+      console.log(args[1] + ' [-h] [-v] [-s <dir>] [-d <dir]')
       process.exit(0)
     } else {
-      throw new Error(util.format('Unknown arg: %s', arg))
+      throw new Error(`Unknown arg: ${arg}`)
     }
   }
 
   await cleanAllFiles(srcDir, destDir, { verbose })
   if (watch) {
-    watchSourceAndCleanDest(srcDir, destDir, { verbose })
+    await watchSourceAndCleanDest(srcDir, destDir, { verbose })
   }
 }
 
@@ -38,7 +36,7 @@ export async function main() {
     // await to ensure exceptions are propagated
     await doMain()
   } catch (e) {
-    console.error(e.message)
+    console.error(typeof e === 'string' ? e : e.message)
     process.exit(1)
   }
 }

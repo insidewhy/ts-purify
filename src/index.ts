@@ -1,9 +1,11 @@
 import { promisify } from 'util'
 import { Client } from 'fb-watchman'
-import { readdirSync, statSync, unlink } from 'fs'
+import { readdirSync, statSync, unlink, realpath, exists } from 'fs'
 import { join } from 'path'
 
 const goodUnlink = promisify(unlink)
+const goodExists = promisify(exists)
+const goodRealpath = promisify(realpath)
 
 const walkSync = function(
   dir: string,
@@ -58,7 +60,11 @@ export async function cleanAllFiles(
   )
 
   if (options.verbose) {
-    console.info('Deleting files %O', toDelete)
+    if (toDelete.length) {
+      console.info('Deleting files %O', toDelete)
+    } else {
+      console.info('No files to delete')
+    }
   }
 
   return Promise.all(toDelete.map(file => goodUnlink(file)))
@@ -68,7 +74,66 @@ export function watchSourceAndCleanDest(
   srcDir: string,
   destDir: string,
   options: Options = {},
-): void {
-  console.log('TODO: watch and clean %s %s', srcDir, destDir, options)
+): Promise<void> {
   const client = new Client()
+
+  return new Promise((_, reject) => {
+    client.capabilityCheck({ optional: [], required: ['relative_root'] }, async error => {
+      const endAndReject = (message: string) => {
+        client.end()
+        reject(new Error(message))
+      }
+
+      if (error) {
+        return endAndReject(`Could not confirm capabilities: ${error.message}`)
+      }
+
+      const fullSrcDir = await goodRealpath(srcDir)
+      client.command(['watch-project', fullSrcDir], (error, watchResp) => {
+        if (error) {
+          return endAndReject(`Could not initiate watch: ${error.message}`)
+        }
+
+        const sub: any = {
+          expression: ['allof', ['match', '*.ts']],
+          fields: ['name', 'exists'],
+        }
+        const relativePath = watchResp.relative_path
+        if (relativePath) {
+          sub.relative_root = relativePath
+        }
+
+        client.command(['subscribe', watchResp.watch, 'sub-name', sub], error => {
+          if (error) {
+            return endAndReject(`Could not subscribe to changes: ${error.message}`)
+          }
+
+          client.on('subscription', change => {
+            change.files.forEach((fileChange: any) => {
+              if (!fileChange.exists) {
+                const fileRoot = fileChange.name.replace(/\.ts$/, '')
+                const toDelete = [
+                  join(destDir, `${fileRoot}.js`),
+                  join(destDir, `${fileRoot}.js.map`),
+                ]
+
+                // don't map/await these, just log on failure
+                toDelete.forEach(async file => {
+                  if (await goodExists(file)) {
+                    unlink(file, err => {
+                      if (err) {
+                        console.warn(`Failed to remove ${file}`)
+                      } else if (options.verbose) {
+                        console.info(`Removed ${file}`)
+                      }
+                    })
+                  }
+                })
+              }
+            })
+          })
+        })
+      })
+    })
+  })
 }
