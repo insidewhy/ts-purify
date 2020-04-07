@@ -7,13 +7,13 @@ const goodUnlink = promisify(unlink)
 const goodExists = promisify(exists)
 const goodRealpath = promisify(realpath)
 
-const walkSync = function(
+const walkSync = function (
   dir: string,
   select: (file: string) => boolean,
   append: (file: string) => void,
 ) {
   const files = readdirSync(dir)
-  files.forEach(file => {
+  files.forEach((file) => {
     const fullPath = join(dir, file)
     if (statSync(fullPath).isDirectory()) {
       walkSync(fullPath, select, append)
@@ -37,8 +37,8 @@ export async function cleanAllFiles(
   const srcSet = new Set()
   walkSync(
     srcDir,
-    file => file.endsWith('.ts'),
-    file => {
+    (file) => file.endsWith('.ts'),
+    (file) => {
       srcSet.add(file.slice(srcDir.length + 1))
     },
   )
@@ -46,7 +46,7 @@ export async function cleanAllFiles(
   const toDelete: string[] = []
   walkSync(
     destDir,
-    file => {
+    (file) => {
       if (!file.endsWith('.js') && !file.endsWith('.js.map')) {
         return false
       }
@@ -54,7 +54,7 @@ export async function cleanAllFiles(
       const correspondingSource = file.slice(destDir.length + 1).replace(/\.js(\.map)?/, '.ts')
       return !srcSet.has(correspondingSource)
     },
-    file => {
+    (file) => {
       toDelete.push(file)
     },
   )
@@ -67,7 +67,7 @@ export async function cleanAllFiles(
     }
   }
 
-  return Promise.all(toDelete.map(file => goodUnlink(file)))
+  return Promise.all(toDelete.map((file) => goodUnlink(file)))
 }
 
 export function watchSourceAndCleanDest(
@@ -78,7 +78,7 @@ export function watchSourceAndCleanDest(
   const client = new Client()
 
   return new Promise((_, reject) => {
-    client.capabilityCheck({ optional: [], required: ['relative_root'] }, async error => {
+    client.capabilityCheck({ optional: [], required: ['relative_root'] }, async (error) => {
       const endAndReject = (message: string) => {
         client.end()
         reject(new Error(message))
@@ -100,15 +100,16 @@ export function watchSourceAndCleanDest(
         }
         const relativePath = watchResp.relative_path
         if (relativePath) {
+          // eslint-disable-next-line @typescript-eslint/camelcase
           sub.relative_root = relativePath
         }
 
-        client.command(['subscribe', watchResp.watch, 'sub-name', sub], error => {
+        client.command(['subscribe', watchResp.watch, 'sub-name', sub], (error) => {
           if (error) {
             return endAndReject(`Could not subscribe to changes: ${error.message}`)
           }
 
-          client.on('subscription', change => {
+          client.on('subscription', (change) => {
             change.files.forEach((fileChange: any) => {
               if (!fileChange.exists) {
                 const fileRoot = fileChange.name.replace(/\.ts$/, '')
@@ -118,9 +119,9 @@ export function watchSourceAndCleanDest(
                 ]
 
                 // don't map/await these, just log on failure
-                toDelete.forEach(async file => {
+                toDelete.forEach(async (file) => {
                   if (await goodExists(file)) {
-                    unlink(file, err => {
+                    unlink(file, (err) => {
                       if (err) {
                         console.warn(`Failed to remove ${file}`)
                       } else if (options.verbose) {

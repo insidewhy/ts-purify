@@ -2,29 +2,49 @@
   "name": "ts-purify",
   "version": "1.1.0",
   "description": "ensure compiled typescript files are removed when the corresponding source files are",
-  "main": "lib/index.js",
-  "scripts": {
-    "prepublishOnly": "npm run build",
-    "test": "cd test && ./run-tests.sh",
-    "build": "tsc -p src",
-    "watch": "npm run build -- -w"
-  },
-  "bin": {
-    "ts-purify": "./bin/ts-purify"
-  },
+  "author": "insidewhy <github@chilon.net>",
+  "license": "ISC",
   "keywords": [
     "typescript",
     "tsc"
   ],
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/insidewhy/mirror-directories.git"
+  },
+  "main": "dist/index.js",
+  "typings": "dist/index",
+  "bin": {
+    "ts-purify": "./bin/ts-purify"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "test": "cd test && ./run-tests.sh",
+    "build": "tsc -p src",
+    "watch": "yarn build -w",
+    "clean": "rimraf dist",
+    "lint": "eslint 'src/*.ts'",
+    "lint-fix": "yarn lint --fix",
+    "run-prettier": "prettier 'src/*.ts' '*.md'",
+    "validate-prettiness": "yarn run-prettier -c",
+    "make-prettier": "yarn run-prettier --write",
+    "validate": "yarn test && yarn lint && yarn validate-prettiness"
+  },
   "dependencies": {
-    "fb-watchman": "^2.0.0"
+    "fb-watchman": "^2.0.1"
   },
   "devDependencies": {
-    "@types/fb-watchman": "^2.0.0",
-    "@types/node": "^12.7.4",
-    "husky": "^3.0.5",
-    "pretty-quick": "^1.11.1"
+    "@types/fb-watchman": "2.0.0",
+    "@types/node": "12.12.34",
+    "@typescript-eslint/eslint-plugin": "2.27.0",
+    "@typescript-eslint/parser": "2.27.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.1",
+    "husky": "4.2.3",
+    "prettier": "2.0.4",
+    "pretty-quick": "2.0.1",
+    "rimraf": "3.0.2",
+    "typescript": "3.8.3"
   }
 }

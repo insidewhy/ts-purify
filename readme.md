@@ -25,6 +25,7 @@ These invocations show the defaults for `-s` and `-l`, they can be omitted when 
 The `-v` or `--verbose` option can be used to log deleted files.
 
 In most cases `package.json` `scripts` will just need to be modified from something like:
+
 ```json
 {
   "build:watch": "tsc -p . -w"
@@ -32,6 +33,7 @@ In most cases `package.json` `scripts` will just need to be modified from someth
 ```
 
 To:
+
 ```json
 {
   "build:watch": "ts-purify -w & tsc -p . -w"
@@ -39,6 +41,7 @@ To:
 ```
 
 To support Windows, use `concurrently` instead of `&`:
+
 ```json
 {
   "build:watch": "concurrently \"ts-purify -w\" \"tsc -p . -w\""
