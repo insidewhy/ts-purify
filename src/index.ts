@@ -11,7 +11,7 @@ const walkSync = function (
   dir: string,
   select: (file: string) => boolean,
   append: (file: string) => void,
-) {
+): void {
   const files = readdirSync(dir)
   files.forEach((file) => {
     const fullPath = join(dir, file)
@@ -25,8 +25,9 @@ const walkSync = function (
   })
 }
 
-interface Options {
+export interface Options {
   verbose?: boolean
+  watchProject?: boolean
 }
 
 export async function cleanAllFiles(
@@ -79,7 +80,7 @@ export function watchSourceAndCleanDest(
 
   return new Promise((_, reject) => {
     client.capabilityCheck({ optional: [], required: ['relative_root'] }, async (error) => {
-      const endAndReject = (message: string) => {
+      const endAndReject = (message: string): void => {
         client.end()
         reject(new Error(message))
       }
@@ -89,52 +90,55 @@ export function watchSourceAndCleanDest(
       }
 
       const fullSrcDir = await goodRealpath(srcDir)
-      client.command(['watch-project', fullSrcDir], (error, watchResp) => {
-        if (error) {
-          return endAndReject(`Could not initiate watch: ${error.message}`)
-        }
-
-        const sub: any = {
-          expression: ['allof', ['match', '*.ts']],
-          fields: ['name', 'exists'],
-        }
-        const relativePath = watchResp.relative_path
-        if (relativePath) {
-          // eslint-disable-next-line @typescript-eslint/camelcase
-          sub.relative_root = relativePath
-        }
-
-        client.command(['subscribe', watchResp.watch, 'sub-name', sub], (error) => {
+      client.command(
+        [options.watchProject ? 'watch-project' : 'watch', fullSrcDir],
+        (error, watchResp) => {
           if (error) {
-            return endAndReject(`Could not subscribe to changes: ${error.message}`)
+            return endAndReject(`Could not initiate watch: ${error.message}`)
           }
 
-          client.on('subscription', (change) => {
-            change.files.forEach((fileChange: any) => {
-              if (!fileChange.exists) {
-                const fileRoot = fileChange.name.replace(/\.ts$/, '')
-                const toDelete = [
-                  join(destDir, `${fileRoot}.js`),
-                  join(destDir, `${fileRoot}.js.map`),
-                ]
+          const sub: any = {
+            expression: ['allof', ['match', '*.ts']],
+            fields: ['name', 'exists'],
+          }
+          const relativePath = watchResp.relative_path
+          if (relativePath) {
+            // eslint-disable-next-line @typescript-eslint/camelcase
+            sub.relative_root = relativePath
+          }
 
-                // don't map/await these, just log on failure
-                toDelete.forEach(async (file) => {
-                  if (await goodExists(file)) {
-                    unlink(file, (err) => {
-                      if (err) {
-                        console.warn(`Failed to remove ${file}`)
-                      } else if (options.verbose) {
-                        console.info(`Removed ${file}`)
-                      }
-                    })
-                  }
-                })
-              }
+          client.command(['subscribe', watchResp.watch, 'sub-name', sub], (error) => {
+            if (error) {
+              return endAndReject(`Could not subscribe to changes: ${error.message}`)
+            }
+
+            client.on('subscription', (change) => {
+              change.files.forEach((fileChange: any) => {
+                if (!fileChange.exists) {
+                  const fileRoot = fileChange.name.replace(/\.ts$/, '')
+                  const toDelete = [
+                    join(destDir, `${fileRoot}.js`),
+                    join(destDir, `${fileRoot}.js.map`),
+                  ]
+
+                  // don't map/await these, just log on failure
+                  toDelete.forEach(async (file) => {
+                    if (await goodExists(file)) {
+                      unlink(file, (err) => {
+                        if (err) {
+                          console.warn(`Failed to remove ${file}`)
+                        } else if (options.verbose) {
+                          console.info(`Removed ${file}`)
+                        }
+                      })
+                    }
+                  })
+                }
+              })
             })
           })
-        })
-      })
+        },
+      )
     })
   })
 }

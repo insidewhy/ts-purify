@@ -6,27 +6,27 @@
 
 ## Motivation
 
-When compiling typescript files in `src` to an output directory in `lib` with `tsc`, the `js` files already existing in `lib` are left alone, potentially interfering with the build system and tests.
+When compiling typescript files in `src` to an output directory in `dist` with `tsc`, the `js` files already existing in `dist` are left alone, potentially interfering with the build system and tests.
 
 `ts-purify` deletes all `js` and `js.map` files in the output directory with no corresponding `ts` files when it is run. It can also be configured to watch the source directory for deletions and then delete corresponding output files as they occur.
 
 ## Instructions
 
-To recursively delete all `js` and `js.map` files in `lib` with no corresponding `ts` file in `src`:
+To recursively delete all `js` and `js.map` files in `dist` with no corresponding `ts` file in `src`:
 
 ```bash
-% ts-purify -s src -d lib
+% ts-purify -s src -d dist
 ```
 
-To do the same as the above command, then use `watchman` to scan `src` for deleted `ts` files and remove files from `lib` as necessary:
+To do the same as the above command, then use `watchman` to scan `src` for deleted `ts` files and remove files from `dist` as necessary:
 
 ```bash
-% ts-purify -s src -d lib -w
+% ts-purify -s src -d dist -w
 ```
 
-These invocations show the defaults for `-s` and `-l`, they can be omitted when also using `src` and `lib` respectively.
+These invocations show the defaults for `-s` and `-l`, they can be omitted when also using `src` and `dist` respectively.
 
-The `-v` or `--verbose` option can be used to log deleted files.
+The `-v` or `--verbose` option can be used to log deleted files. The `-p` option can be used to use watchman's `watch-project` command instead of `watch`.
 
 In most cases `package.json` `scripts` will just need to be modified from something like:
 
