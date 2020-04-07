@@ -1,5 +1,9 @@
 # ts-purify
 
+[![build status](https://circleci.com/gh/insidewhy/ts-purify.png?style=shield)](https://circleci.com/gh/insidewhy/ts-purify)
+[![Known Vulnerabilities](https://snyk.io/test/github/insidewhy/ts-purify/badge.svg)](https://snyk.io/test/github/insidewhy/ts-purify)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
+
 ## Motivation
 
 When compiling typescript files in `src` to an output directory in `lib` with `tsc`, the `js` files already existing in `lib` are left alone, potentially interfering with the build system and tests.
