@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/insidewhy/mirror-directories.git"
+    "url": "git://github.com/insidewhy/ts-purify.git"
   },
   "main": "dist/index.js",
   "typings": "dist/index",
