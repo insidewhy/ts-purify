@@ -19,6 +19,8 @@ async function doMain(): Promise<void> {
       destDir = args[++i]
     } else if (arg === '-w' || arg === '--watch-project') {
       options.watchProject = true
+    } else if (arg === '--ignore-pattern') {
+      options.ignorePattern = args[++i]
     } else if (arg === '-h' || arg === '--help') {
       console.log(args[1] + ' [-h] [-v] [-s <dir>] [-d <dir]')
       process.exit(0)
