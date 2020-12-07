@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 srcsub=src/sub1/sub2
 distsub=dist/sub1/sub2
