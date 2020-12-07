@@ -19,8 +19,10 @@ async function doMain(): Promise<void> {
       destDir = args[++i]
     } else if (arg === '-w' || arg === '--watch-project') {
       options.watchProject = true
+    } else if (arg === '-i' || arg === '--ignore-pattern') {
+      options.ignorePattern = args[++i]
     } else if (arg === '-h' || arg === '--help') {
-      console.log(args[1] + ' [-h] [-v] [-s <dir>] [-d <dir]')
+      console.log(args[1] + ' [-h] [-v] [-s <dir>] [-d <dir>] [-i <pattern>]')
       process.exit(0)
     } else {
       throw new Error(`Unknown arg: ${arg}`)

@@ -1,3 +1,4 @@
+import minimatch from 'minimatch'
 import { promisify } from 'util'
 import { Client } from 'fb-watchman'
 import { readdirSync, statSync, unlink, realpath, exists } from 'fs'
@@ -26,6 +27,7 @@ const walkSync = function (
 }
 
 export interface Options {
+  ignorePattern?: string
   verbose?: boolean
   watchProject?: boolean
 }
@@ -49,6 +51,10 @@ export async function cleanAllFiles(
     destDir,
     (file) => {
       if (!file.endsWith('.js') && !file.endsWith('.js.map')) {
+        return false
+      }
+
+      if (options.ignorePattern && minimatch(file, options.ignorePattern)) {
         return false
       }
 
@@ -123,7 +129,10 @@ export function watchSourceAndCleanDest(
 
                   // don't map/await these, just log on failure
                   toDelete.forEach(async (file) => {
-                    if (await goodExists(file)) {
+                    if (
+                      (await goodExists(file)) &&
+                      !(options.ignorePattern && minimatch(file, options.ignorePattern))
+                    ) {
                       unlink(file, (err) => {
                         if (err) {
                           console.warn(`Failed to remove ${file}`)

@@ -24,6 +24,14 @@ touch $distsub/{five.js,six.js.map,something.blah}
 [ -f $distsub/six.js.map ] && die "failed to delete subdirectory file"
 [ -f dist/two.js ] && die "failed to delete root file"
 
+touch src/{one.ts,two.ts}
+
+touch dist/{one.js,one.js.map,two.js,two.js.map,ignore-me.js}
+
+../bin/ts-purify --ignore-pattern dist/ignore-*.js
+
+[ ! -f dist/ignore-me.js ] && die "deleted ignored file"
+
 ../bin/ts-purify -w &
 rm src/one.ts
 rm $srcsub/five.ts

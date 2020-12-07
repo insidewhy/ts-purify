@@ -8,7 +8,8 @@
     "outDir": "../dist",
     "sourceMap": true,
     "target": "es2017",
-    "preserveWatchOutput": true
+    "preserveWatchOutput": true,
+    "esModuleInterop": true
   },
   "include": ["."]
 }
