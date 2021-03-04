@@ -1,6 +1,6 @@
 {
   "name": "ts-purify",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "ensure compiled typescript files are removed when the corresponding source files are",
   "author": "insidewhy <github@chilon.net>",
   "license": "ISC",
@@ -32,11 +32,10 @@
     "validate": "yarn test && yarn lint && yarn validate-prettiness"
   },
   "dependencies": {
-    "fb-watchman": "^2.0.1",
+    "cousin-harris": "^1.0.0",
     "minimatch": "^3.0.4"
   },
   "devDependencies": {
-    "@types/fb-watchman": "2.0.0",
     "@types/node": "12.20.4",
     "@typescript-eslint/eslint-plugin": "4.16.1",
     "@typescript-eslint/parser": "4.16.1",

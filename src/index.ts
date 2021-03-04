@@ -1,12 +1,10 @@
+import cousinHarris from 'cousin-harris'
 import minimatch from 'minimatch'
 import { promisify } from 'util'
-import { Client } from 'fb-watchman'
-import { readdirSync, statSync, unlink, realpath, exists } from 'fs'
+import { readdirSync, statSync, unlink, existsSync } from 'fs'
 import { join } from 'path'
 
 const goodUnlink = promisify(unlink)
-const goodExists = promisify(exists)
-const goodRealpath = promisify(realpath)
 
 const walkSync = function (
   dir: string,
@@ -81,72 +79,32 @@ export function watchSourceAndCleanDest(
   srcDir: string,
   destDir: string,
   options: Options = {},
-): Promise<void> {
-  const client = new Client()
-
-  return new Promise((_, reject) => {
-    client.capabilityCheck({ optional: [], required: ['relative_root'] }, async (error) => {
-      const endAndReject = (message: string): void => {
-        client.end()
-        reject(new Error(message))
+): Promise<never> {
+  return cousinHarris(
+    [srcDir],
+    ({ path, removal }) => {
+      if (!removal) {
+        return
       }
+      const fileRoot = path.replace(/\.ts$/, '')
+      const toDelete = [join(destDir, `${fileRoot}.js`), join(destDir, `${fileRoot}.js.map`)]
 
-      if (error) {
-        return endAndReject(`Could not confirm capabilities: ${error.message}`)
-      }
-
-      const fullSrcDir = await goodRealpath(srcDir)
-      client.command(
-        [options.watchProject ? 'watch-project' : 'watch', fullSrcDir],
-        (error, watchResp) => {
-          if (error) {
-            return endAndReject(`Could not initiate watch: ${error.message}`)
-          }
-
-          const sub: any = {
-            expression: ['allof', ['match', '*.ts']],
-            fields: ['name', 'exists'],
-          }
-          const relativePath = watchResp.relative_path
-          if (relativePath) {
-            sub.relative_root = relativePath
-          }
-
-          client.command(['subscribe', watchResp.watch, 'sub-name', sub], (error) => {
-            if (error) {
-              return endAndReject(`Could not subscribe to changes: ${error.message}`)
+      // don't map/await these, just log on failure
+      toDelete.forEach(async (file) => {
+        if (
+          existsSync(file) &&
+          !(options.ignorePattern && minimatch(file, options.ignorePattern))
+        ) {
+          unlink(file, (err) => {
+            if (err) {
+              console.warn(`Failed to remove ${file}`)
+            } else if (options.verbose) {
+              console.info(`Removed ${file}`)
             }
-
-            client.on('subscription', (change) => {
-              change.files.forEach((fileChange: any) => {
-                if (!fileChange.exists) {
-                  const fileRoot = fileChange.name.replace(/\.ts$/, '')
-                  const toDelete = [
-                    join(destDir, `${fileRoot}.js`),
-                    join(destDir, `${fileRoot}.js.map`),
-                  ]
-
-                  // don't map/await these, just log on failure
-                  toDelete.forEach(async (file) => {
-                    if (
-                      (await goodExists(file)) &&
-                      !(options.ignorePattern && minimatch(file, options.ignorePattern))
-                    ) {
-                      unlink(file, (err) => {
-                        if (err) {
-                          console.warn(`Failed to remove ${file}`)
-                        } else if (options.verbose) {
-                          console.info(`Removed ${file}`)
-                        }
-                      })
-                    }
-                  })
-                }
-              })
-            })
           })
-        },
-      )
-    })
-  })
+        }
+      })
+    },
+    { watchProject: options.watchProject },
+  )
 }
