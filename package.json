@@ -38,8 +38,8 @@
   "devDependencies": {
     "@types/fb-watchman": "2.0.0",
     "@types/node": "12.12.37",
-    "@typescript-eslint/eslint-plugin": "2.34.0",
-    "@typescript-eslint/parser": "2.34.0",
+    "@typescript-eslint/eslint-plugin": "4.16.1",
+    "@typescript-eslint/parser": "4.16.1",
     "eslint": "7.1.0",
     "eslint-config-prettier": "6.11.0",
     "husky": "5.0.9",
