@@ -79,7 +79,7 @@ export function watchSourceAndCleanDest(
   srcDir: string,
   destDir: string,
   options: Options = {},
-): Promise<never> {
+): Promise<() => Promise<void>> {
   return cousinHarris(
     [srcDir],
     ({ path, removal }) => {
