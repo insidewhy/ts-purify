@@ -32,9 +32,9 @@ async function doMain(): Promise<void> {
   await cleanAllFiles(srcDir, destDir, options)
   if (watch) {
     const stopWatching = await watchSourceAndCleanDest(srcDir, destDir, options)
-    process.on('exit', () => {
-      stopWatching()
-    })
+    process.on('exit', stopWatching)
+    process.on('SIGTERM', stopWatching)
+    process.on('SIGINT', stopWatching)
   }
 }
 
