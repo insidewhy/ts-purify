@@ -40,7 +40,7 @@ export async function cleanAllFiles(
     srcDir,
     (file) => file.endsWith('.ts') || file.endsWith('.tsx'),
     (file) => {
-      srcSet.add(file.slice(srcDir.length + 1))
+      srcSet.add(srcDir === '.' ? file : file.slice(srcDir.length + 1))
     },
   )
 
