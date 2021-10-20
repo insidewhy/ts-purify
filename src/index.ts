@@ -38,7 +38,7 @@ export async function cleanAllFiles(
   const srcSet = new Set()
   walkSync(
     srcDir,
-    (file) => file.endsWith('.ts'),
+    (file) => file.endsWith('.ts') || file.endsWith('.tsx'),
     (file) => {
       srcSet.add(file.slice(srcDir.length + 1))
     },
@@ -57,7 +57,7 @@ export async function cleanAllFiles(
       }
 
       const correspondingSource = file.slice(destDir.length + 1).replace(/\.js(\.map)?/, '.ts')
-      return !srcSet.has(correspondingSource)
+      return !srcSet.has(correspondingSource) && !srcSet.has(correspondingSource + 'x')
     },
     (file) => {
       toDelete.push(file)
