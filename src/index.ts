@@ -12,7 +12,11 @@ const walkSync = function (
   append: (file: string) => void,
 ): void {
   const files = readdirSync(dir)
-  files.forEach((file) => {
+  for (const file of files) {
+    if (file === 'node_modules') {
+      continue
+    }
+
     const fullPath = join(dir, file)
     if (statSync(fullPath).isDirectory()) {
       walkSync(fullPath, select, append)
@@ -21,7 +25,7 @@ const walkSync = function (
         append(fullPath)
       }
     }
-  })
+  }
 }
 
 export interface Options {
@@ -90,7 +94,7 @@ export function watchSourceAndCleanDest(
       const toDelete = [join(destDir, `${fileRoot}.js`), join(destDir, `${fileRoot}.js.map`)]
 
       // don't map/await these, just log on failure
-      toDelete.forEach(async (file) => {
+      for (const file of toDelete) {
         if (
           existsSync(file) &&
           !(options.ignorePattern && minimatch(file, options.ignorePattern))
@@ -103,7 +107,7 @@ export function watchSourceAndCleanDest(
             }
           })
         }
-      })
+      }
     },
     { watchProject: options.watchProject },
   )
