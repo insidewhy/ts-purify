@@ -1,4 +1,4 @@
-import cousinHarris from 'cousin-harris'
+import cousinHarris, { CousinHarrisWatcher } from 'cousin-harris'
 import minimatch from 'minimatch'
 import { promisify } from 'util'
 import { readdirSync, statSync, unlink, existsSync } from 'fs'
@@ -83,7 +83,7 @@ export function watchSourceAndCleanDest(
   srcDir: string,
   destDir: string,
   options: Options = {},
-): Promise<() => Promise<void>> {
+): CousinHarrisWatcher {
   return cousinHarris(
     [srcDir],
     ({ path, removal }) => {
